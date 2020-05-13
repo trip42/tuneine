@@ -17,6 +17,7 @@ const randomElement = function( arr ) {
 // parse json bodies
 app.use( bodyParser.json() );
 
+// store for active games
 let games = {};
 
 const getGame = function(code) {
@@ -36,6 +37,7 @@ class Game {
     this.activePlayerCode = '';
     this.players = [];
     this.timer = null;
+    this.createTime = Date.now();
   }
 
   setActivePlayer( index ) {
@@ -61,9 +63,9 @@ class Game {
     this.round++;
 
     // clear player guesses
-    for( let player in this.players ) {
-      this.players[player].guess = null;
-      this.players[player].state = 'playing';
+    for( let i=0; i<this.players.length; i++) {
+      this.players[i].guess = null;
+      this.players[i].state = 'playing';
     }
 
     // rotate to the next player
@@ -110,7 +112,7 @@ class Game {
     let scoreCount = 0;
 
     // update scores
-    for( let playerIndex in this.players ) {
+    for( let playerIndex=0; playerIndex<this.players.length; playerIndex++ ) {
       let player = this.players[ playerIndex ];
       let guess = player.guess;
 
@@ -149,6 +151,7 @@ class Game {
       target: this.target,
       round: this.round,
       activePlayer: this.activePlayer,
+      activePlayerCode: this.activePlayerCode,
       players: this.players
     }
   }
@@ -168,9 +171,9 @@ class Game {
   }
 
   getPlayer( code ) {
-    for( let player in this.players ) {
-      if ( this.players[player].code === code ) {
-        return this.players[player];
+    for( let i=0; i<this.players.length; i++) {
+      if ( this.players[i].code === code ) {
+        return this.players[i];
       }
     }
     return null;
@@ -191,7 +194,8 @@ class Game {
 
     // check if all players have submitted
     let allComplete = true;
-    for( let player in this.players ) {
+    for( let i=0; i<this.players.length; i++) {
+      let player = this.players[i];
       if ( player.guess == null ) {
         allComplete = false;
         break;

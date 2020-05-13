@@ -2,16 +2,266 @@
 <html>
 <head>
   <title>Tune In! - A Group Continuum Game</title>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<h1>Continuum</h1>
 
-Code: <input type="text" name="code" id="code" />
-<button id="join">Join Game</button>
+<h1 class="title">In Tune</h1>
+<div id="error" class="error">Error Message</div>
 
-<p>Or</p>
+<div id="screen-waiting" class="screen">
+  <div class="instructions" id="waiting-message">Waiting...</div>
+</div>
 
-<button id="create">Create Game</button>
+<div id="screen-start" class="screen">
+  <div class="instructions">
+      Center a Game Code to join an existing game
+  </div>
+
+  <input type="text" name="code" id="code" class="text-input" placeholder="Enter Game Code" style="width: 12em;"/>
+  <button id="join">Join Game</button>
+  <p>Or</p>
+  <button id="create">Create Game</button>
+</div>
+
+<div id="screen-enter-name" class="screen">
+  <div class="instructions">
+      Enter your name below
+  </div>
+
+  <input type="text" name="name" id="name" placeholder="Enter Name" class="text-input"/>
+  <button id="enter-name">Enter Name</button>
+</div>
+
+<div id="screen-waiting-players" class="screen">
+  <div class="instructions">
+      <div>Invite others to join with game code:</div>
+      <div id="game-code"></div>
+  </div>
+
+  <h3>Waiting for Players...</h3>
+  <ul id="players" class="player-list"></ul>
+  <button id="start-game">Start Game</button>
+</div>
+
+<div id="screen-give-clue" class="screen">
+  <div id="instructions">
+      Enter a Clue that falls on the at the pointer
+  </div>
+
+  <div class="continuum">
+    <div class="left-option-container">
+      <div class="option" id="give-left-option">Worst athlete of all time</div>
+    </div>
+    <div class="right-option-container">
+      <div class="option" id="give-right-option">Greatest athlete of all time</div>
+    </div>
+  </div>
+  <div class="slider">
+    <div class="pointer-container" id="give-pointer">
+      <div class="pointer"></div>
+      <div class="pointer-body">
+        Target
+      </div>
+    </div>
+  </div>
+
+  <input type="text" name="clue" id="clue" class="text-input" placeholder="Enter a Clue" style="width: 12em;"/>
+  <button id="submit-clue">Submit Clue</button>
+</div>
+
+<div id="screen-guess" class="screen">
+  <div id="instructions">
+      Set the slider where you think<br>
+      <strong>Patrick Swayze</strong><br>
+      falls on this continuum
+  </div>
+
+  <div id="continuum">
+    <div id="left"><div class="option">Worst athlete of all time</div></div>
+    <div id="right"><div class="option">Greatest athlete of all time</div></div>
+  </div>
+  <div id="slider">
+    <div id="pointer-container">
+      <div id="pointer"></div>
+      <div id="pointer-body">
+        Slide Me!
+        <div id="percent">0%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-scores" class="screen">
+  <div class="instructions"></div>
+
+  <h3>Scores</h3>
+  <ol id="scores" class="player-list"></ol>
+  <button id="start-round">Next Round</button>
+</div>
+
+<script>
+
+function showScreen( id ) {
+  let screens = document.querySelectorAll( '.screen' );
+
+  // hide all screens
+  for ( let i=0; i<screens.length; i++ ) {
+    screens[i].style.display = 'none'
+  }
+
+  // display the selected screen
+  document.querySelector( '#' + id ).style.display = 'block';
+}
+
+function showError( html ) {
+  $error.style.display = 'block';
+
+  $error.innerHTML = html;
+
+  clearTimeout( errorTimeout );
+  errorTimeout = setTimeout( () => {
+    $error.style.display = 'none';
+  }, 5000);
+}
+
+var code = '';
+var playerCode = '';
+var $error = document.getElementById( 'error' );
+var $waiting = document.getElementById( 'waiting-message' );
+var errorTimeout = null
+
+document.getElementById( 'join' ).addEventListener( 'click', joinGame );
+document.getElementById( 'create' ).addEventListener( 'click', createGame );
+document.getElementById( 'enter-name' ).addEventListener( 'click', enterName );
+document.getElementById( 'start-game' ).addEventListener( 'click', startGame );
+
+// fetch the game state every five seconds
+setInterval( fetchGameState, 5000 );
+
+showScreen( 'screen-start' );
+
+async function createGame() {
+  // create a new game
+  let game = await fetch('/game/', {
+    method: 'POST',
+    cache: 'no-cache',
+    headers: { 'Content-Type': 'application/json' }
+  }).then( res => res.json() )
+
+  code = game.code;
+
+  showScreen( 'screen-enter-name' );
+}
+
+async function startGame() {
+  // create a new game
+  let game = await fetch('/game/' + code + '/actions/startGame', {
+    method: 'POST',
+    cache: 'no-cache',
+    headers: { 'Content-Type': 'application/json' }
+  }).then( res => res.json() )
+
+  showScreen('screen-waiting');
+
+}
+
+function joinGame() {
+  code = document.getElementById( 'code' ).value;
+
+  if (!code) {
+    showError( 'Invalid Game Code' );
+    return;
+  }
+
+  showScreen( 'screen-enter-name' );
+}
+
+async function enterName() {
+  let name = document.getElementById( 'name' ).value;
+  let res = null;
+
+  if (!name) {
+    showError( 'Missing Name!' );
+    return;
+  }
+
+  // joining an existing game
+  let player = await fetch('/game/' + code + '/player', {
+    method: 'POST',
+    cache: 'no-cache',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify( { name: name })
+  }).then( res => res.json() )
+
+  // store the player code
+  playerCode = player.code;
+
+  showScreen( 'screen-waiting-players' );
+
+}
+
+function updatePlayerList( players ) {
+  var $players = document.getElementById( 'players' );
+
+  $players.innerHTML = '';
+
+  for (var i=0; i<players.length; i++ ) {
+    var $item = document.createElement('li');
+    $item.innerText = players[i].name;
+    $players.appendChild($item)
+  }
+}
+
+function fetchGameState() {
+  if (code) {
+    fetch('/game/' + code)
+      .then( res => res.json() )
+      .then( res => {
+
+          if ( res.error ) { return; }
+
+          // find the active player
+          let activePlayer = null;
+
+          for( var i=0;i<res.players.length; i++ ){
+            if ( res.activePlayerCode == res.players[i].code ) {
+              activePlayer = res.players[i];
+            }
+          }
+
+          if ( res.state == 'waitingForPlayers' ) {
+            updatePlayerList( res.players );
+            document.getElementById( 'game-code' ).innerText = res.code;
+
+          } else if (res.state == 'waitingForClue') {
+
+            if ( playerCode == res.activePlayerCode ) {
+              showScreen( 'screen-give-clue' );
+
+              document.getElementById( 'give-left-option' ).innerHTML = '&larr; ' + res.pair[0];
+              document.getElementById( 'give-right-option' ).innerHTML =  res.pair[1] + ' &rarr;';
+              // convert the target from range -100 to 100 into 0% to 100%
+              document.getElementById( 'give-pointer' ).style.left = '' + Math.round( (res.target + 100) / 2 ) + '%';
+            } else {
+              showScreen( 'screen-waiting' );
+              $waiting.innerText = 'Waiting for ' + activePlayer.name + ' to give a clue';
+            }
+
+          } else if ( res.state == 'waitingForGuesses' ) {
+
+          }
+
+      })
+
+
+  }
+}
+
+
+
+
+</script>
 
 </body>
 </html>

@@ -1,0 +1,134 @@
+body {
+    margin: 0px;
+    font-family:  verdana, arial, sans-serif;
+    background-color:  #99a;
+    text-align: center;
+}
+
+.left-option-container {
+    width:  50%;
+    float:  left;
+    height: 150px;
+    background-color:  #695;
+    text-align: left;
+}
+
+.right-option-container {
+    float:  right;
+    width:  50%;
+    background-color:  #9c9;
+    height: 150px;
+    /* padding: 10px; */
+    text-align:  right;
+}
+
+.option {
+    margin: 10px;
+}
+
+.title {
+    text-align:  center;
+    background-color:  #669;
+    color:  #fff;
+    padding:  5px 0px;
+    margin:  0;
+}
+
+.instructions {
+    text-align:  center;
+    line-height: 1.4em;
+    padding: 5px 0px;
+}
+
+.error {
+    text-align:  center;
+    line-height: 1.6em;
+    padding: 5px 0px;
+    background-color: #A66;
+    color: white;
+    font-weight: bold;
+    display: none;
+}
+
+.pointer {
+    border-width: 0px 15px 40px 15px;
+    border-color:  transparent;
+    border-bottom-color: white;
+    border-style:  solid;
+    width: 0px;
+    height: 0px;
+    margin-top:  10px;
+    position:  absolute;
+    top: -20px;
+    margin-left: -15px;
+    left: 0%;
+    /* box-shadow: 0px 2px 10px #333; */
+}
+
+.slider {
+    position:  relative;
+    top: 131px;
+}
+
+.pointer-container {
+    position:  absolute;
+    left: 50%;
+    height:  200px;
+}
+
+.pointer-body {
+    margin-top:  30px;
+    margin-left:  -50%;
+    background-color: green;
+    width: 60px;
+    text-align:  center;
+    border-radius:  10px;
+    padding: 5px;
+    font-size:  10px;
+    border:  1px solid white;
+    color:  white;
+    /* box-shadow: 0px 2px 10px #333; */
+}
+
+button {
+    /* position:  relative; */
+    text-align:  center;
+    width: 80%;
+    font-size:  1.2em;
+    margin:  10px auto;
+    padding: 20px;
+    background-color:  green;
+    border-radius:  10px;
+    border-color:  white;
+    color:  white;
+    display:  block;
+}
+
+.text-input {
+  text-align:  center;
+  width: 80%;
+  font-size:  1.4em;
+  margin:  10px auto;
+  padding: 10px;
+  background-color:  white;
+  border-radius:  10px;
+  border-color:  white;
+  color:  #333;
+  display:  block;
+}
+
+.player-list {
+  text-align: left;
+  font-size: 1.4em;
+  color: white;
+  width: 60%;
+  margin: 10px auto;
+}
+
+#game-code {
+  font-size: 4em;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 30px 0px;
+  color: white;
+}
